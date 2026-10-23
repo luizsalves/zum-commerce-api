@@ -1,0 +1,10 @@
+bin/
+obj/
+.vs/
+.idea/
+*.user
+TestResults/
+backend/src/Core.Web/appsettings.Development.json
+keys/
+*.pfx
+*.pem

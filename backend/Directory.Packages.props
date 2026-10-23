@@ -1,0 +1,27 @@
+<Project>
+  <!-- Versões NuGet centralizadas: os .csproj referenciam pacotes sem versão. -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageFloatingVersionsEnabled>true</CentralPackageFloatingVersionsEnabled>
+  </PropertyGroup>
+
+  <ItemGroup Label="Web">
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.*" />
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.*" />
+  </ItemGroup>
+
+  <ItemGroup Label="Infraestrutura">
+    <PackageVersion Include="FirebaseAdmin" Version="3.*" />
+    <PackageVersion Include="Google.Cloud.Firestore" Version="3.*" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="10.0.*" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.*" />
+    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.*" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.*" />
+  </ItemGroup>
+
+  <ItemGroup Label="Testes">
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.*" />
+    <PackageVersion Include="xunit" Version="2.*" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.*" />
+  </ItemGroup>
+</Project>

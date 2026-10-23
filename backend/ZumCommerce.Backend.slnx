@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Core.Domain/Core.Domain.csproj" />
+    <Project Path="src/Core.Application/Core.Application.csproj" />
+    <Project Path="src/Core.Infrastructure/Core.Infrastructure.csproj" />
+    <Project Path="src/Core.Infrastructure.CrossCutting/Core.Infrastructure.CrossCutting.csproj" />
+    <Project Path="src/Core.Infrastructure.IoC/Core.Infrastructure.IoC.csproj" />
+    <Project Path="src/Core.Web/Core.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Core.Web.Tests/Core.Web.Tests.csproj" />
+  </Folder>
+</Solution>
