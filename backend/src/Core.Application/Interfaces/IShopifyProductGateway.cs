@@ -13,4 +13,7 @@ public interface IShopifyProductGateway
     Task<string> SaveAsync(string tenantId, Product product, CancellationToken ct);
 
     Task SetStatusAsync(string tenantId, string productId, string status, CancellationToken ct);
+
+    /// <summary>Publica (ou despublica) o produto nos canais de vendas da loja. Sem canais configurados, não faz nada.</summary>
+    Task SyncPublicationsAsync(string tenantId, string productId, bool published, IReadOnlyList<string> publicationIds, CancellationToken ct);
 }

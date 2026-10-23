@@ -11,6 +11,12 @@ public sealed class TestTenantConnection(TenantAccessService access, IShopifySho
     {
         access.RequirePlatformAdmin();
         var tenant = await access.RequireTenantAsync(tenantId, ct);
-        return await shop.GetShopInfoAsync(tenant.Id, ct);
+        var info = await shop.GetShopInfoAsync(tenant.Id, ct);
+        return info with
+        {
+            Publications = info.Publications
+                .Select(p => p with { Selected = tenant.PublicationIds.Contains(p.Id) })
+                .ToList(),
+        };
     }
 }

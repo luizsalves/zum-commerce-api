@@ -31,6 +31,14 @@ public sealed class PlatformController : ControllerBase
     public Task<ShopInfoResponse> Test(string tenantId, [FromServices] TestTenantConnection useCase, CancellationToken ct) =>
         useCase.ExecuteAsync(tenantId, ct);
 
+    [HttpPut("{tenantId}/publications")]
+    public async Task<IActionResult> UpdatePublications(
+        string tenantId, [FromBody] UpdatePublicationsRequest request, [FromServices] UpdateTenantPublications useCase, CancellationToken ct)
+    {
+        await useCase.ExecuteAsync(tenantId, request, ct);
+        return NoContent();
+    }
+
     [HttpPost("{tenantId}/members")]
     public Task<MemberResponse> AddMember(
         string tenantId, [FromBody] AddMemberRequest request, [FromServices] AddTenantMember useCase, CancellationToken ct) =>

@@ -8,7 +8,8 @@ As rotas de loja exigem também o cabeçalho `X-Tenant-Id: <id da loja>`.
 | `GET /api/me` | qualquer usuário logado | Se é da equipe da plataforma e quais lojas administra |
 | `POST /api/platform/tenants` | equipe da plataforma | Cadastra loja (quem cadastra vira dono) |
 | `PUT /api/platform/tenants/{id}/credentials` | equipe da plataforma | Troca Client ID/Secret ou define Access Token |
-| `POST /api/platform/tenants/{id}/test` | equipe da plataforma | Testa a conexão com a Shopify |
+| `POST /api/platform/tenants/{id}/test` | equipe da plataforma | Testa a conexão com a Shopify e lista os canais de vendas |
+| `PUT /api/platform/tenants/{id}/publications` | equipe da plataforma | Define os canais onde os produtos são publicados (`{ "publicationIds": [...] }`) |
 | `POST /api/platform/tenants/{id}/members` | equipe da plataforma | Libera acesso ao painel por e-mail |
 | `GET /api/admin/products?q=&after=` | membro da loja | Lista produtos (paginação por cursor) |
 | `GET /api/admin/product?id=` | membro da loja | Detalhe do produto (`id` = gid da Shopify) |

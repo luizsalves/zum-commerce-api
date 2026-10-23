@@ -10,7 +10,8 @@
 ## 2. Shopify (para cada loja)
 
 1. **Admin API**: no admin da loja, vá em Configurações → Apps → Desenvolver apps → **Dev Dashboard**. Crie o app dentro da organização da loja, defina os escopos, faça o Release, instale na loja e copie o **Client ID** e o **Client Secret**.
-   - Escopos: `read_products`, `write_products`, `read_inventory`, `write_inventory`, `read_locations`, `read_customers`, `write_customers`, `write_files`.
+   - Escopos: `read_products`, `write_products`, `read_inventory`, `write_inventory`, `read_locations`, `read_customers`, `write_customers`, `write_files`, `read_publications`, `write_publications`.
+   - Depois de cadastrar a loja no painel, use **Testar conexão** e marque o canal de vendas do site (normalmente **Headless**). Sem isso, o produto salvo não aparece na vitrine.
    - Peça acesso a **dados protegidos de clientes** (nome, e-mail, telefone).
    - O *client credentials* só funciona quando o app e a loja estão na mesma organização. Para lojas de outras organizações, use o modo `access_token` (app OAuth, fase 2).
 2. **Storefront API**: instale o canal **Headless** e copie o token público.

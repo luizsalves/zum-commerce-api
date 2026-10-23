@@ -4,7 +4,10 @@ namespace Core.Infrastructure.Shopify;
 internal static class ShopifyQueries
 {
     public const string Shop = """
-        query { shop { name myshopifyDomain currencyCode plan { publicDisplayName } } }
+        query {
+          shop { name myshopifyDomain currencyCode plan { publicDisplayName } }
+          publications(first: 25) { nodes { id catalog { title } } }
+        }
         """;
 
     public const string PrimaryLocation = """
@@ -47,6 +50,18 @@ internal static class ShopifyQueries
             product { id }
             userErrors { field message }
           }
+        }
+        """;
+
+    public const string PublishProduct = """
+        mutation($id: ID!, $input: [PublicationInput!]!) {
+          publishablePublish(id: $id, input: $input) { userErrors { field message } }
+        }
+        """;
+
+    public const string UnpublishProduct = """
+        mutation($id: ID!, $input: [PublicationInput!]!) {
+          publishableUnpublish(id: $id, input: $input) { userErrors { field message } }
         }
         """;
 

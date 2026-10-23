@@ -12,6 +12,7 @@ public sealed class Tenant
     public string? LogoUrl { get; set; }
     public string? Whatsapp { get; set; }
     public List<string> Domains { get; set; } = [];
+    public List<string> PublicationIds { get; set; } = [];   // canais de vendas que recebem os produtos (ex.: Headless)
     public bool Active { get; set; } = true;
     public DateTimeOffset CreatedAt { get; init; } = DateTimeOffset.UtcNow;
 }

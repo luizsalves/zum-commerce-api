@@ -12,5 +12,6 @@ public sealed class SetProductStatus(TenantAccessService access, IShopifyProduct
         var tenant = await access.RequireMemberAsync(tenantId, ct);
         if (!ProductStatuses.All.Contains(status)) throw AppException.Validation("Status inválido.");
         await products.SetStatusAsync(tenant.Id, productId, status, ct);
+        await products.SyncPublicationsAsync(tenant.Id, productId, status == ProductStatuses.Active, tenant.PublicationIds, ct);
     }
 }

@@ -15,6 +15,7 @@ public sealed class TenantDocument
     [FirestoreProperty("logoUrl")] public string? LogoUrl { get; set; }
     [FirestoreProperty("whatsapp")] public string? Whatsapp { get; set; }
     [FirestoreProperty("domains")] public List<string> Domains { get; set; } = [];
+    [FirestoreProperty("publicationIds")] public List<string> PublicationIds { get; set; } = [];
     [FirestoreProperty("active")] public bool Active { get; set; } = true;
     [FirestoreProperty("createdAt")] public Timestamp CreatedAt { get; set; } = Timestamp.GetCurrentTimestamp();
 
@@ -29,6 +30,7 @@ public sealed class TenantDocument
         LogoUrl = LogoUrl,
         Whatsapp = Whatsapp,
         Domains = Domains ?? [],
+        PublicationIds = PublicationIds ?? [],
         Active = Active,
         CreatedAt = CreatedAt.ToDateTimeOffset(),
     };
@@ -43,6 +45,7 @@ public sealed class TenantDocument
         LogoUrl = t.LogoUrl,
         Whatsapp = t.Whatsapp,
         Domains = t.Domains,
+        PublicationIds = t.PublicationIds,
         Active = t.Active,
         CreatedAt = Timestamp.FromDateTimeOffset(t.CreatedAt),
     };

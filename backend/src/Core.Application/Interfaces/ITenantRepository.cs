@@ -9,6 +9,7 @@ public interface ITenantRepository
     Task CreateAsync(Tenant tenant, TenantCredentials credentials, TenantMember owner, CancellationToken ct);
     Task<TenantCredentials?> GetCredentialsAsync(string tenantId, CancellationToken ct);
     Task SaveCredentialsAsync(string tenantId, TenantCredentials credentials, CancellationToken ct);
+    Task UpdatePublicationsAsync(string tenantId, IReadOnlyList<string> publicationIds, CancellationToken ct);
     Task<bool> IsMemberAsync(string tenantId, string uid, CancellationToken ct);
     Task AddMemberAsync(TenantMember member, CancellationToken ct);
     Task<IReadOnlyList<Tenant>> ListAllAsync(CancellationToken ct);
