@@ -13,7 +13,10 @@ public sealed class ShopifyShopGateway(ShopifyGraphQLClient client, ShopifyToken
             shop.Str("name") ?? "",
             shop.Str("myshopifyDomain") ?? "",
             shop.Str("currencyCode"),
-            shop.Str("plan", "publicDisplayName"));
+            shop.Str("plan", "publicDisplayName"),
+            data.GetProperty("publications").GetProperty("nodes").EnumerateArray()
+                .Select(p => new ShopPublication(p.Str("id") ?? "", p.Str("catalog", "title") ?? "Canal sem nome", false))
+                .ToList());
     }
 
     public void InvalidateToken(string tenantId) => tokens.Invalidate(tenantId);

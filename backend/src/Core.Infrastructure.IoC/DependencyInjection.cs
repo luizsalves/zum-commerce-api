@@ -62,6 +62,7 @@ public static class DependencyInjection
         services.AddScoped<UpdateTenantCredentials>();
         services.AddScoped<AddTenantMember>();
         services.AddScoped<TestTenantConnection>();
+        services.AddScoped<UpdateTenantPublications>();
 
         services.AddScoped<ListProducts>();
         services.AddScoped<GetProduct>();

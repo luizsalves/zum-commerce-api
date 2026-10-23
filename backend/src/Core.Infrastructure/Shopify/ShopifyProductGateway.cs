@@ -104,6 +104,20 @@ public sealed class ShopifyProductGateway(ShopifyGraphQLClient client, IMemoryCa
         ShopifyGraphQLClient.ThrowOnUserErrors(data.GetProperty("productSet"));
     }
 
+    public async Task SyncPublicationsAsync(
+        string tenantId, string productId, bool published, IReadOnlyList<string> publicationIds, CancellationToken ct)
+    {
+        if (publicationIds.Count == 0) return;
+
+        var (mutation, field) = published
+            ? (ShopifyQueries.PublishProduct, "publishablePublish")
+            : (ShopifyQueries.UnpublishProduct, "publishableUnpublish");
+        var input = publicationIds.Select(id => new { publicationId = id }).ToList();
+
+        var data = await client.ExecuteAsync(tenantId, mutation, new { id = productId, input }, ct);
+        ShopifyGraphQLClient.ThrowOnUserErrors(data.GetProperty(field));
+    }
+
     /// <summary>Local de estoque principal (o "local de processamento de pedidos" da loja).</summary>
     private async Task<string> GetPrimaryLocationIdAsync(string tenantId, CancellationToken ct)
     {

@@ -207,7 +207,7 @@ Ao lado do cadastro, atualiza a cada tecla. Por forma de pagamento: taxa Shopify
 
 ## 7. Status
 
-### 7.1 Já implementado (código entregue, C# ainda **não compilado** — ambiente sem NuGet)
+### 7.1 Já implementado (API e front compilando, testes passando)
 
 **API (`zum-commerce-api`)** — solução com 6 projetos: `Core.Domain`, `Core.Application`, `Core.Infrastructure`, `Core.Infrastructure.CrossCutting`, `Core.Infrastructure.IoC`, `Core.Web` + `tests/Core.Web.Tests` (xUnit).
 - Autenticação Firebase (JWT), regras de acesso por loja, criptografia AES-GCM das credenciais.
@@ -224,8 +224,8 @@ Ao lado do cadastro, atualiza a cada tecla. Por forma de pagamento: taxa Shopify
 ### 7.2 Pendências — prioridade
 
 **P0 — antes de qualquer loja real**
-1. **Publicar produto no canal de vendas** após salvar (`publishablePublish`) e despublicar em rascunho/arquivado (ver 5.3).
-2. **Compilar e testar o C#** (`dotnet build`, `dotnet test`) e corrigir o que aparecer.
+1. ~~**Publicar produto no canal de vendas**~~ — **feito**: a loja guarda `publicationIds` (escolhidos em Plataforma → Testar conexão); ao salvar, produto ativo vai para `publishablePublish` e rascunho/arquivado para `publishableUnpublish`. App precisa dos escopos `read_publications`/`write_publications`.
+2. ~~**Compilar e testar o C#**~~ — **feito** (.NET 10.0.402): build sem erros nem avisos, 38 testes passando. Front: build ok, 15 testes passando.
 3. Confirmar que `inventoryQuantities` no `productSet` **atualiza estoque de produto existente**; se não, usar `inventorySetQuantities`.
 4. **CORS / proxy para sites sob medida:** liberar o domínio do site em `Cors:Origins` ou fazer o hosting do site redirecionar `/api` para a API.
 5. Checklist manual: testar conexão; produto simples e com tamanhos; editar e adicionar foto sem perder as antigas; cadastro de cliente cria Customer (+55); checkout abre com e-mail preenchido.

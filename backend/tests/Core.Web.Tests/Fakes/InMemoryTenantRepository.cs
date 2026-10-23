@@ -40,6 +40,12 @@ public sealed class InMemoryTenantRepository : ITenantRepository
         return Task.CompletedTask;
     }
 
+    public Task UpdatePublicationsAsync(string tenantId, IReadOnlyList<string> publicationIds, CancellationToken ct)
+    {
+        Tenants[tenantId].PublicationIds = publicationIds.ToList();
+        return Task.CompletedTask;
+    }
+
     public Task<bool> IsMemberAsync(string tenantId, string uid, CancellationToken ct) =>
         Task.FromResult(Members.Any(m => m.TenantId == tenantId && m.Uid == uid));
 

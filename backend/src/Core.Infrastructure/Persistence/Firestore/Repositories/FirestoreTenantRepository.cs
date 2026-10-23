@@ -54,6 +54,12 @@ public sealed class FirestoreTenantRepository(FirestoreDb db, IMemoryCache cache
     public Task SaveCredentialsAsync(string tenantId, TenantCredentials credentials, CancellationToken ct) =>
         SecretsRef(tenantId).SetAsync(TenantCredentialsDocument.FromDomain(credentials), cancellationToken: ct);
 
+    public async Task UpdatePublicationsAsync(string tenantId, IReadOnlyList<string> publicationIds, CancellationToken ct)
+    {
+        await TenantRef(tenantId).UpdateAsync("publicationIds", publicationIds.ToList(), cancellationToken: ct);
+        cache.Remove(TenantKey(tenantId));
+    }
+
     public async Task<bool> IsMemberAsync(string tenantId, string uid, CancellationToken ct)
     {
         var key = $"member:{tenantId}:{uid}";
