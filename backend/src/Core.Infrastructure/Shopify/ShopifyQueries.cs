@@ -32,7 +32,7 @@ internal static class ShopifyQueries
           product(id: $id) {
             id title descriptionHtml vendor productType tags status hasOnlyDefaultVariant
             options { name optionValues { name } }
-            media(first: 20) { nodes { id alt ... on MediaImage { image { url } } } }
+            media(first: 20) { nodes { id alt mediaContentType ... on MediaImage { image { url } } } }
             variants(first: 100) {
               nodes {
                 id price compareAtPrice inventoryQuantity
@@ -62,6 +62,15 @@ internal static class ShopifyQueries
     public const string UnpublishProduct = """
         mutation($id: ID!, $input: [PublicationInput!]!) {
           publishableUnpublish(id: $id, input: $input) { userErrors { field message } }
+        }
+        """;
+
+    public const string StagedUploadsCreate = """
+        mutation($input: [StagedUploadInput!]!) {
+          stagedUploadsCreate(input: $input) {
+            stagedTargets { url resourceUrl parameters { name value } }
+            userErrors { field message }
+          }
         }
         """;
 

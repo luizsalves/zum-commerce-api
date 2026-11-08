@@ -68,6 +68,7 @@ public static class DependencyInjection
         services.AddScoped<GetProduct>();
         services.AddScoped<SaveProduct>();
         services.AddScoped<SetProductStatus>();
+        services.AddScoped<UploadProductImage>();
 
         services.AddScoped<ListCustomers>();
         services.AddScoped<GetMyCustomerProfile>();

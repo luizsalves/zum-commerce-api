@@ -14,6 +14,7 @@ As rotas de loja exigem também o cabeçalho `X-Tenant-Id: <id da loja>`.
 | `GET /api/admin/products?q=&after=` | membro da loja | Lista produtos (paginação por cursor) |
 | `GET /api/admin/product?id=` | membro da loja | Detalhe do produto (`id` = gid da Shopify) |
 | `POST /api/admin/product` | membro da loja | Cria (sem `id`) ou atualiza produto |
+| `POST /api/admin/product/image` | membro da loja | Envia uma foto (`multipart/form-data`, campo `file`, até 20 MB) direto para a Shopify e devolve `{ "url": "..." }` para usar em `images[].url` |
 | `POST /api/admin/product/status?id=` | membro da loja | Ativa, deixa em rascunho ou arquiva |
 | `GET /api/admin/customers?q=&after=` | membro da loja | Lista clientes da Shopify |
 | `GET /api/store/customers/me` | cliente logado | Cadastro do cliente nesta loja (404 = ainda não cadastrado) |
@@ -39,8 +40,10 @@ X-Tenant-Id: elika
     { "id": null, "options": { "Tamanho": "P" }, "price": 79.9, "compareAtPrice": 99.9, "cost": 30, "sku": "TIA-P", "quantity": 10, "weightGrams": 40 },
     { "id": null, "options": { "Tamanho": "M" }, "price": 79.9, "compareAtPrice": 99.9, "cost": 30, "sku": "TIA-M", "quantity": 8, "weightGrams": 45 }
   ],
-  "images": [{ "id": null, "url": "https://firebasestorage.googleapis.com/...", "alt": "Tiara de pérolas" }]
+  "images": [{ "id": null, "url": "https://shopify-staged-uploads.storage.googleapis.com/...", "alt": "Tiara de pérolas" }]
 }
 ```
 
 Produto sem variação: `"options": []` e uma única variação com `"options": {}`.
+
+Foto nova: primeiro `POST /api/admin/product/image` e depois a `url` devolvida vai em `images` com `"id": null`. Foto que já está no produto vai pelo `id`. Logo depois de salvar, ela pode vir com `"url": null` por alguns segundos, enquanto a Shopify processa.

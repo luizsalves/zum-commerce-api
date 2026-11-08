@@ -14,7 +14,7 @@ public sealed record ProductVariant(
     int? Quantity,
     decimal? WeightGrams);
 
-/// <summary>Imagem: Id = mídia já existente na Shopify; Url = imagem nova (ex.: link do Firebase Storage).</summary>
+/// <summary>Imagem: Id = mídia já existente na Shopify (Url nula enquanto processa); sem Id, Url = imagem nova (ex.: devolvida pelo envio de foto).</summary>
 public sealed record ProductImage(string? Id, string? Url, string? Alt);
 
 public sealed record Product(

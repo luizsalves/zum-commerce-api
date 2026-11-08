@@ -16,4 +16,7 @@ public interface IShopifyProductGateway
 
     /// <summary>Publica (ou despublica) o produto nos canais de vendas da loja. Sem canais configurados, não faz nada.</summary>
     Task SyncPublicationsAsync(string tenantId, string productId, bool published, IReadOnlyList<string> publicationIds, CancellationToken ct);
+
+    /// <summary>Envia a foto para o armazenamento da Shopify (staged upload) e devolve a URL a usar como imagem nova do produto.</summary>
+    Task<string> StageImageAsync(string tenantId, string fileName, string contentType, Stream content, CancellationToken ct);
 }

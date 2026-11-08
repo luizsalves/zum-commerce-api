@@ -4,11 +4,12 @@ using Core.Domain.Common;
 
 namespace Core.Web.Tests.Fakes;
 
-/// <summary>Gateway de produtos em memória: registra as publicações pedidas.</summary>
+/// <summary>Gateway de produtos em memória: registra as publicações e as fotos enviadas.</summary>
 public sealed class FakeProductGateway : IShopifyProductGateway
 {
     public Dictionary<string, Product> Products { get; } = new();
     public List<(string ProductId, bool Published, IReadOnlyList<string> PublicationIds)> Syncs { get; } = new();
+    public List<(string TenantId, string FileName, string ContentType)> StagedImages { get; } = new();
 
     public Task<PagedResult<ProductSummary>> ListAsync(string tenantId, string? search, string? after, CancellationToken ct) =>
         throw new NotImplementedException();
@@ -30,5 +31,11 @@ public sealed class FakeProductGateway : IShopifyProductGateway
     {
         Syncs.Add((productId, published, publicationIds));
         return Task.CompletedTask;
+    }
+
+    public Task<string> StageImageAsync(string tenantId, string fileName, string contentType, Stream content, CancellationToken ct)
+    {
+        StagedImages.Add((tenantId, fileName, contentType));
+        return Task.FromResult($"https://shopify-staged-uploads.storage.googleapis.com/tmp/{fileName}");
     }
 }

@@ -4,8 +4,8 @@
 
 1. Crie um projeto no plano **Blaze** (o Cloud Run exige faturamento).
 2. **Authentication**: ative Google, E-mail/senha e Facebook. O Facebook pede App ID e App Secret de um app em developers.facebook.com. Adicione os domínios das lojas em *Domínios autorizados*.
-3. Ative **Firestore** e **Storage** na região `southamerica-east1`.
-4. As regras (`firestore.rules`, `storage.rules`) estão no repositório do front e são publicadas com `firebase deploy`.
+3. Ative o **Firestore** na região `southamerica-east1`. O **Storage** não é necessário: as fotos de produto vão pela API direto para a Shopify.
+4. As regras do Firestore (`firestore.rules`) estão no repositório do front e são publicadas com `firebase deploy --only firestore:rules`.
 
 ## 2. Shopify (para cada loja)
 

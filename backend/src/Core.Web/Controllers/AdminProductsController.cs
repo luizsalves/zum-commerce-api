@@ -40,6 +40,19 @@ public sealed class AdminProductsController : ControllerBase
         CancellationToken ct) =>
         useCase.ExecuteAsync(tenantId, product, ct);
 
+    // multipart/form-data com o campo "file". A URL devolvida vai em images[].url ao salvar o produto.
+    [HttpPost("product/image")]
+    [RequestSizeLimit(ImageFiles.MaxBytes + 1024 * 1024)]
+    public async Task<UploadedImageResponse> UploadImage(
+        [FromHeader(Name = TenantIds.HeaderName)] string? tenantId,
+        IFormFile? file,
+        [FromServices] UploadProductImage useCase,
+        CancellationToken ct)
+    {
+        await using var content = file?.OpenReadStream() ?? Stream.Null;
+        return await useCase.ExecuteAsync(tenantId, file?.FileName, file?.ContentType, file?.Length ?? 0, content, ct);
+    }
+
     [HttpPost("product/status")]
     public async Task<IActionResult> SetStatus(
         [FromHeader(Name = TenantIds.HeaderName)] string? tenantId,

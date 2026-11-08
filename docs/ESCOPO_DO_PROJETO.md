@@ -38,7 +38,7 @@ Modelo de negócio: implantação + mensalidade por loja.
 │ projeto separado  │   └──────────────────┘ carrinho│ Checkout        │
 └───────────────────┘───────────────────────────────►│ Admin API       │
                                                       └──────────────────┘
-Firebase: Auth (login), Firestore (lojas, membros, cadastros, taxas), Storage (fotos)
+Firebase: Auth (login), Firestore (lojas, membros, cadastros, taxas). Storage não é usado: fotos vão direto para a Shopify.
 ```
 
 | Peça | Repositório | Stack | Deploy |
@@ -155,7 +155,8 @@ Motivo: vitrine rápida e barata (não depende do servidor da Zum) e segura (cri
 
 - Campos: nome, descrição, categoria (productType), marca (vendor), tags, status (Ativo / Rascunho / Arquivado), fotos, opções (até 3, ex.: Tamanho P/M/G, Cor), e por variação: **preço, preço "de", custo, estoque, peso (g), SKU**.
 - Grade de variações gerada automaticamente (Tamanho × Cor), preservando o que já foi digitado; variação nova herda preço/custo/peso; "aplicar em todas".
-- Fotos: upload para **Firebase Storage** (`tenants/{id}/products/…`) → URL enviada à Shopify. Primeira foto = capa; reordenar e remover.
+- Fotos: o painel diminui a foto no navegador (JPEG, lado máximo 2048 px, ~1 MB) → `POST /api/admin/product/image` → a API faz o *staged upload* na Shopify (`stagedUploadsCreate` + envio do arquivo) e devolve a URL, usada no `productSet`. Não usa Firebase Storage, que exige o plano Blaze. Primeira foto = capa; reordenar e remover.
+- Foto recém-salva fica alguns segundos sem URL (processando na Shopify): o painel mostra "Processando…" e a API mantém a foto na lista pelo `id`.
 - Salvar: `POST /api/admin/product` → API valida → **Shopify `productSet`** (cria/atualiza produto, opções, variações, preços, custo, peso, estoque e fotos numa chamada) → devolve o produto como ficou.
 - Produto simples (sem variação): a Shopify exige a opção `Title = "Default Title"`; a API faz isso sozinha.
 - `productSet` trata listas como **completas**: a API reenvia fotos existentes por `id` (senão seriam apagadas).
@@ -212,14 +213,15 @@ Ao lado do cadastro, atualiza a cada tecla. Por forma de pagamento: taxa Shopify
 **API (`zum-commerce-api`)** — solução com 6 projetos: `Core.Domain`, `Core.Application`, `Core.Infrastructure`, `Core.Infrastructure.CrossCutting`, `Core.Infrastructure.IoC`, `Core.Web` + `tests/Core.Web.Tests` (xUnit).
 - Autenticação Firebase (JWT), regras de acesso por loja, criptografia AES-GCM das credenciais.
 - Token Shopify por loja com cache e renovação; cliente GraphQL com retentativa em limite de taxa e renovação de token em 401.
-- Endpoints: `GET /api/me`; `POST /api/platform/tenants`; `PUT …/{id}/credentials`; `POST …/{id}/test`; `POST …/{id}/members`; `GET /api/admin/products`; `GET/POST /api/admin/product`; `POST /api/admin/product/status`; `GET /api/admin/customers`; `GET /api/store/customers/me`; `POST /api/store/customers/register`; `GET /health`.
+- Endpoints: `GET /api/me`; `POST /api/platform/tenants`; `PUT …/{id}/credentials`; `POST …/{id}/test`; `POST …/{id}/members`; `GET /api/admin/products`; `GET/POST /api/admin/product`; `POST /api/admin/product/image`; `POST /api/admin/product/status`; `GET /api/admin/customers`; `GET /api/store/customers/me`; `POST /api/store/customers/register`; `GET /health`.
 - Erros padronizados `{ "error": "…" }` (400/401/403/404/409/422/502).
 
 **Front (`zum-commerce/frontend`)** — Atomic Design (`atoms`, `molecules`, `organisms`, `templates`, `pages`), `routes`, `contexts`, `data`, `lib`, `types`.
 - Vitrine padrão: home, busca, produto com variações, carrinho lateral, login (Google/Facebook/e-mail), cadastro obrigatório, ponte para checkout, minha conta, botão WhatsApp, cor da marca por loja.
 - Painel: produtos (lista/cadastro/edição com fotos e grade de variações), simulador de taxas, tela de taxas, clientes, plataforma.
-- Regras Firestore/Storage; `firebase.json` com rewrite `/api/**` → Cloud Run.
-- 15 testes de lógica (taxas, preço sugerido, variações, formatação) passando.
+- Fotos diminuídas no navegador e enviadas pela API direto para a Shopify (sem Firebase Storage).
+- Regras do Firestore; `firebase.json` com rewrite `/api/**` → Cloud Run.
+- 18 testes de lógica (taxas, preço sugerido, variações, formatação, tamanho das fotos) passando.
 
 ### 7.2 Pendências — prioridade
 

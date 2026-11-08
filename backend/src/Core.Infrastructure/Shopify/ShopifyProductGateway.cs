@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using System.Text.Json;
 using Core.Application.Exceptions;
 using Core.Application.Interfaces;
@@ -6,13 +7,18 @@ using Core.Domain.Common;
 using Core.Domain.Constants;
 using Core.Infrastructure.CrossCutting.Extensions;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 
 namespace Core.Infrastructure.Shopify;
 
 /// <summary>
 /// Produtos via productSet: cria/atualiza produto, opções, variações, preços, custo, peso, estoque e fotos numa chamada.
 /// </summary>
-public sealed class ShopifyProductGateway(ShopifyGraphQLClient client, IMemoryCache cache) : IShopifyProductGateway
+public sealed class ShopifyProductGateway(
+    ShopifyGraphQLClient client,
+    IMemoryCache cache,
+    IHttpClientFactory httpFactory,
+    ILogger<ShopifyProductGateway> logger) : IShopifyProductGateway
 {
     public async Task<PagedResult<ProductSummary>> ListAsync(string tenantId, string? search, string? after, CancellationToken ct)
     {
@@ -64,8 +70,10 @@ public sealed class ShopifyProductGateway(ShopifyGraphQLClient client, IMemoryCa
                 v.Walk("inventoryItem", "measurement", "weight") is { } w ? ToGrams(w) : null))
             .ToList();
 
+        // Foto recém-enviada fica alguns segundos sem URL (processando). Ela continua na lista para não ser
+        // apagada no próximo productSet, que trata "files" como lista completa.
         var images = p.GetProperty("media").GetProperty("nodes").EnumerateArray()
-            .Where(m => m.Str("image", "url") is not null)
+            .Where(m => m.Str("mediaContentType") == "IMAGE")
             .Select(m => new ProductImage(m.Str("id"), m.Str("image", "url"), m.Str("alt")))
             .ToList();
 
@@ -117,6 +125,61 @@ public sealed class ShopifyProductGateway(ShopifyGraphQLClient client, IMemoryCa
         var data = await client.ExecuteAsync(tenantId, mutation, new { id = productId, input }, ct);
         ShopifyGraphQLClient.ThrowOnUserErrors(data.GetProperty(field));
     }
+
+    public async Task<string> StageImageAsync(string tenantId, string fileName, string contentType, Stream content, CancellationToken ct)
+    {
+        var data = await client.ExecuteAsync(tenantId, ShopifyQueries.StagedUploadsCreate, new
+        {
+            input = new[] { new { resource = "IMAGE", filename = fileName, mimeType = contentType, httpMethod = "POST" } },
+        }, ct);
+        var payload = data.GetProperty("stagedUploadsCreate");
+        ShopifyGraphQLClient.ThrowOnUserErrors(payload);
+
+        var target = payload.Walk("stagedTargets") is { ValueKind: JsonValueKind.Array } targets && targets.GetArrayLength() > 0
+            ? targets[0]
+            : throw AppException.External("A Shopify não devolveu o endereço para enviar a foto.");
+        var url = target.Str("url");
+        var resourceUrl = target.Str("resourceUrl");
+        if (url is null || resourceUrl is null) throw AppException.External("A Shopify não devolveu o endereço para enviar a foto.");
+
+        using var form = BuildUploadForm(target.GetProperty("parameters"), content, contentType, fileName);
+        var http = httpFactory.CreateClient(ShopifyHttp.ClientName);
+        using var response = await http.PostAsync(url, form, ct);
+        if (!response.IsSuccessStatusCode)
+        {
+            logger.LogWarning("Falha ao enviar foto da loja {Tenant}: {Status} {Body}",
+                tenantId, (int)response.StatusCode, await response.Content.ReadAsStringAsync(ct));
+            throw AppException.External("A Shopify não aceitou a foto. Tente de novo.");
+        }
+        return resourceUrl;
+    }
+
+    /// <summary>
+    /// Formulário do staged upload: campos assinados primeiro e o arquivo por último. O armazenamento (Google Cloud Storage)
+    /// responde "Malformed multipart body" ao boundary entre aspas e ao filename* que o .NET gera por padrão. Visível para testes.
+    /// </summary>
+    internal static MultipartFormDataContent BuildUploadForm(JsonElement parameters, Stream content, string contentType, string fileName)
+    {
+        var boundary = Guid.NewGuid().ToString("N");
+        var form = new MultipartFormDataContent(boundary);
+        form.Headers.ContentType = MediaTypeHeaderValue.Parse($"multipart/form-data; boundary={boundary}");
+
+        foreach (var parameter in parameters.EnumerateArray())
+        {
+            var field = new StringContent(parameter.Str("value") ?? "");
+            field.Headers.ContentType = null;
+            field.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data") { Name = Quote(parameter.Str("name") ?? "") };
+            form.Add(field);
+        }
+
+        var file = new StreamContent(content);
+        file.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+        file.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data") { Name = Quote("file"), FileName = Quote(fileName) };
+        form.Add(file);
+        return form;
+    }
+
+    private static string Quote(string value) => $"\"{value.Replace("\"", "")}\"";
 
     /// <summary>Local de estoque principal (o "local de processamento de pedidos" da loja).</summary>
     private async Task<string> GetPrimaryLocationIdAsync(string tenantId, CancellationToken ct)
